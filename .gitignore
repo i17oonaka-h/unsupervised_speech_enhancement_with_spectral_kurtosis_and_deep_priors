@@ -173,5 +173,5 @@ cython_debug/
 # local configuration
 corpus/
 preprocessed_data/
-"to be replaced"
+tmp.log
 logs/
