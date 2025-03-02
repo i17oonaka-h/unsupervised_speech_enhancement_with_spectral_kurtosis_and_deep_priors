@@ -8,20 +8,21 @@ import os
 import numpy as np
 from tqdm import tqdm
 import torch
+import copy
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--yaml_path", type=str, default="./configs/proposed.yaml")
     args = parser.parse_args()
-    config = yaml.load(open(args.yaml_path, "r"), Loader=yaml.FullLoader)
-    config = Config(**config)
+    config_yaml = yaml.load(open(args.yaml_path, "r"), Loader=yaml.FullLoader)
+    config = Config(**copy.deepcopy(config_yaml))
     set_seed(config.seed)
     (config.preprocess.dump_dir / "noisy").mkdir(parents=True, exist_ok=True)
     (config.preprocess.dump_dir / "clean").mkdir(parents=True, exist_ok=True)
     (config.preprocess.dump_dir / "noise").mkdir(parents=True, exist_ok=True)
     # output log.yaml
     with open(config.preprocess.dump_dir / "log.yaml", "w") as f:
-        yaml.dump(config.__dict__, f)
+        yaml.dump(config_yaml, f)
 
     # load data
     clean_list = []
@@ -54,6 +55,9 @@ if __name__ == "__main__":
         if srn != config.preprocess.sample_rate:
             noise_waveform = torchaudio.functional.resample(noise_waveform, srn, config.preprocess.sample_rate)
         clean_waveform = clean_waveform
+        if config.preprocess.clip_seconds is not None:
+            start_pos = random.randint(0, clean_waveform.size(1) - config.preprocess.sample_rate * config.preprocess.clip_seconds)
+            clean_waveform = clean_waveform[:, start_pos:start_pos + config.preprocess.sample_rate * config.preprocess.clip_seconds]
         noise_waveform = noise_waveform
         if clean_waveform.size(1) < noise_waveform.size(1):
             start_pos = random.randint(0, noise_waveform.size(1) - clean_waveform.size(1))

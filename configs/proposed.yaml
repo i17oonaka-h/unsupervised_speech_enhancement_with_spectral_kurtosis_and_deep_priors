@@ -24,8 +24,8 @@ preprocess:
     - 5
     - 10
     - 15
-  clean_samples: 10
-  clip_seconds: 2.0
+  clean_samples: 2
+  clip_seconds: 
 
 spec:
   fft_length: 512
@@ -33,7 +33,6 @@ spec:
 
 optimizer:
   lr: 0.001
-  result_dir: "./results/"
   iter: 2000
   batch_size: 4
 

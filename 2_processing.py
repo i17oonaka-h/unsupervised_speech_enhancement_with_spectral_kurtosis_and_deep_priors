@@ -11,6 +11,7 @@ import json
 from logging import getLogger, config
 import torchaudio
 import einops
+import copy
 
 with open('./skddp_se/utils/logging.json', 'r') as f:
     log_conf = json.load(f)
@@ -22,14 +23,14 @@ if __name__ == "__main__":
     parser.add_argument("--yaml_path", type=str, default="./configs/proposed.yaml")
     parser.add_argument("--device_id", type=int, default=0) # if -1, use cpu
     args = parser.parse_args()
-    config = yaml.load(open(args.yaml_path, "r"), Loader=yaml.FullLoader)
-    config = Config(**config)
+    config_yaml = yaml.load(open(args.yaml_path, "r"), Loader=yaml.FullLoader)
+    config = Config(**copy.deepcopy(config_yaml))
     set_seed(config.seed)
     [(config.logging_.log_dir/aaa).mkdir(parents=True, exist_ok=True) for aaa in ["clean", "noise", "noisy"]]
     logger = getLogger(__name__)
     # output log.yaml
     with open(config.logging_.log_dir / "log.yaml", "w") as f:
-        yaml.dump(config.__dict__, f)
+        yaml.dump(config_yaml, f)
     # --- processing ---
     DEVICE = torch.device("cuda", args.device_id) if args.device_id >= 0 else torch.device("cpu")
     processed_samples = list((config.preprocess.dump_dir / "noisy").glob("*.npy"))
@@ -82,7 +83,7 @@ if __name__ == "__main__":
                     # clean
                     clean_est_mixed = einops.rearrange(clean_est_mixed, "1 1 freq time -> 1 freq time")
                     clean_est_mixed = clean_est_mixed * torch.exp(1j*noisy_angle)
-                    clean_est_mixed = ISTFT(clean_est_mixed)
+                    clean_est_mixed = ISTFT(clean_est_mixed, length=noisy_sample.size(-1))
                     clean_est_mixed = clean_est_mixed.detach().cpu()
                     torchaudio.save(
                         config.logging_.log_dir / "clean" / f"{processed_sample.stem}_{i+1}.wav",
@@ -92,7 +93,7 @@ if __name__ == "__main__":
                     # noise
                     noise_est = einops.rearrange(noise_est, "1 1 freq time -> 1 freq time")
                     noise_est = noise_est * torch.exp(1j*noisy_angle)
-                    noise_est = ISTFT(noise_est)
+                    noise_est = ISTFT(noise_est, length=noisy_sample.size(-1))
                     noise_est = noise_est.detach().cpu()
                     torchaudio.save(
                         config.logging_.log_dir / "noise" / f"{processed_sample.stem}_{i+1}.wav",
@@ -111,7 +112,7 @@ if __name__ == "__main__":
             # clean
             clean_est_mixed = einops.rearrange(clean_est_mixed, "1 1 freq time -> 1 freq time")
             clean_est_mixed = clean_est_mixed * torch.exp(1j*noisy_angle)
-            clean_est_mixed = ISTFT(clean_est_mixed)
+            clean_est_mixed = ISTFT(clean_est_mixed, length=noisy_sample.size(-1))
             clean_est_mixed = clean_est_mixed.detach().cpu()
             torchaudio.save(
                 config.logging_.log_dir / "clean" / f"{processed_sample.stem}_{config.optimizer.iter}.wav",
@@ -121,7 +122,7 @@ if __name__ == "__main__":
             # noise
             noise_est = einops.rearrange(noise_est, "1 1 freq time -> 1 freq time")
             noise_est = noise_est * torch.exp(1j*noisy_angle)
-            noise_est = ISTFT(noise_est)
+            noise_est = ISTFT(noise_est, length=noisy_sample.size(-1))
             noise_est = noise_est.detach().cpu()
             torchaudio.save(
                 config.logging_.log_dir / "noise" / f"{processed_sample.stem}_{config.optimizer.iter}.wav",

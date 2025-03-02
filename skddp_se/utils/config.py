@@ -41,7 +41,6 @@ class SpecConfig:
 @dataclass
 class OptimizerConfig:
     lr: float
-    result_dir: Path
     iter: int
     batch_size: int
     
