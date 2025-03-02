@@ -12,7 +12,7 @@ class skddpLoss(torch.nn.Module):
             weight=config.clean_segkurtosis_increasing.weight,
             kernel=config.clean_segkurtosis_increasing.kernel_size,
             shift=config.clean_segkurtosis_increasing.stride,
-            target=target.to("cpu"),
+            target=target.to("cpu")**2,
             type_="Power",
             eps=1e-8,
             optim_type="increasing",
@@ -22,7 +22,7 @@ class skddpLoss(torch.nn.Module):
             weight=config.noise_segkurtosis_decreasing.weight,
             kernel=config.noise_segkurtosis_decreasing.kernel_size,
             shift=config.noise_segkurtosis_decreasing.stride,
-            target=target.to("cpu"),
+            target=target.to("cpu")**2,
             type_="Power",
             eps=1e-8,
             optim_type="decreasing",
@@ -32,7 +32,7 @@ class skddpLoss(torch.nn.Module):
             weight=config.clean_refinement_decreasing.weight,
             kernel=config.clean_refinement_decreasing.kernel_size,
             shift=config.clean_refinement_decreasing.stride,
-            target=target.to("cpu"),
+            target=target.to("cpu")**2,
             type_="Power",
             eps=1e-8,
             optim_type="decreasing",
@@ -42,7 +42,7 @@ class skddpLoss(torch.nn.Module):
             weight=config.clean_refinement_increasing.weight,
             kernel=config.clean_refinement_increasing.kernel_size,
             shift=config.clean_refinement_increasing.stride,
-            target=target.to("cpu"),
+            target=target.to("cpu")**2,
             type_="Power",
             eps=1e-8,
             optim_type="increasing",
@@ -53,16 +53,16 @@ class skddpLoss(torch.nn.Module):
         loss_logits = {}
         loss = self.reconstruction_loss(pred_clean+pred_noise, target_noisy)
         loss_logits["Lrec"] = loss.item()
-        tmp = self.clean_segkurtosis_increasing(pred_clean)
+        tmp = self.clean_segkurtosis_increasing(pred_clean**2)
         loss += tmp
         loss_logits["L1(S)"] = tmp.item()
-        tmp = self.noise_segkurtosis_decreasing(pred_noise)
+        tmp = self.noise_segkurtosis_decreasing(pred_noise**2)
         loss += tmp
         loss_logits["L(N)"] = tmp.item()
-        tmp = self.clean_refinement_decreasing(pred_clean_mixed)
+        tmp = self.clean_refinement_decreasing(pred_clean_mixed**2)
         loss += tmp
         loss_logits["L2(S)_term1"] = tmp.item()
-        tmp = self.clean_refinement_increasing(pred_clean_mixed)
+        tmp = self.clean_refinement_increasing(pred_clean_mixed**2)
         loss += tmp
         loss_logits["L2(S)_term2"] = tmp.item()
         return loss, loss_logits

@@ -1,6 +1,4 @@
 import argparse
-from pathlib import Path
-import random
 from skddp_se.utils.config import Config, set_seed
 import yaml
 import torch
@@ -8,14 +6,15 @@ from skddp_se.model.simple_unet import SimpleTwinUnet
 from skddp_se.model.loss import skddpLoss
 import numpy as np
 import json
-from logging import getLogger, config
+from logging import getLogger
+from logging import config as log_config
 import torchaudio
 import einops
 import copy
 
 with open('./skddp_se/utils/logging.json', 'r') as f:
     log_conf = json.load(f)
-config.dictConfig(log_conf)
+log_config.dictConfig(log_conf)
 
 if __name__ == "__main__":
     # --- setting ---

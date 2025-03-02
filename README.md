@@ -12,7 +12,14 @@ If necessary, call the corpus download script to run the code. This will downloa
 bash 0_corpus_download.sh 
 ```
 
-## 2. Preprocessing
+# Examples
+- example_segkurtosis.ipynb
+    - Sample code to randomly select an audio/noise file downloaded by setup and output its kurtosis.
+- example_speech_enhancement.ipynb
+    - Sample code of our speech enhancement method.
+
+## Dataset processing
+### 1. Preprocessing
 Executing the following code will generate noisy speech as a preprocessing step.
 The various configurations of this code are managed by yaml and its wrapper, dataclass (`skddp_se/utils/config.py`), which refers to `configs/proposed.yaml` by default.
 ```bash
@@ -21,7 +28,7 @@ python 1_data_prepare.py
 # python 1_data_prepare.py --yaml_path [your configuration]
 ```
 
-## 3. Speech enhancement
+### 2. Speech enhancement
 Apply speech enhancement to the noisy speech generated in step 2.
 ```bash
 python 2_processing.py
@@ -30,4 +37,7 @@ python 2_processing.py
 # --device_id [device_id] # if -1, use cpu
 ```
 
-## 4. Calculate metrics
+### 3. Calculate metrics
+```bash
+python 3_metrics.py --log_dir [log_dir of step 3]
+```
