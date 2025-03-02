@@ -1,0 +1,82 @@
+seed: 42
+
+logging_:
+  log_dir: "./logs/LJ-DEMAND_example/"
+  log_freq: 100 # log_step = optimizer.iter // log_freq
+  save_intermediate_steps:
+    - 10
+    - 100
+    - 500
+    - 1000
+
+preprocess:
+  dump_dir: "./preprocessed_data/"
+  sample_rate: 16000
+  noise_list:
+    - "./corpus/DEMAND/NFIELD/ch01.wav"
+    - "./corpus/DEMAND/PRESTO/ch01.wav"
+    - "./corpus/DEMAND/PSTATION/ch01.wav"
+    - "./corpus/DEMAND/SPSQUARE/ch01.wav"
+    - "./corpus/DEMAND/TBUS/ch01.wav"
+  clean_list:
+    - "./corpus/LJSpeech-1.1/wavs/"
+  SNR_list:
+    - 5
+    - 10
+    - 15
+  clean_samples: 10
+  clip_seconds: 2.0
+
+spec:
+  fft_length: 512
+  hop_length: 128
+
+optimizer:
+  lr: 0.001
+  result_dir: "./results/"
+  iter: 2000
+  batch_size: 4
+
+model:
+  mixing_type: "mean"
+  clean_net:
+    input_feature: "uniform-TFcoherent"
+    softplus_beta: 5.0
+  noise_net:
+    input_feature: "meshgrid"
+    softplus_beta: 2.0
+
+loss:
+  reconstruction_loss_type: "MAE"
+  clean_segkurtosis_increasing:
+    weight: 0.00001
+    kernel_size:
+      - 2
+      - 32
+    stride:
+      - 2
+      - 32
+  noise_segkurtosis_decreasing:
+    weight: 2.0
+    kernel_size:
+      - 2
+      - 32
+    stride:
+      - 2
+      - 32
+  clean_refinement_decreasing:
+    weight: 0.001
+    kernel_size:
+      - 16
+      - -1
+    stride:
+      - 16
+      - -1
+  clean_refinement_increasing:
+    weight: 0.001
+    kernel_size:
+      - -1
+      - 16
+    stride:
+      - -1
+      - 16

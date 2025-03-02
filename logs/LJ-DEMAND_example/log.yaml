@@ -1,0 +1,102 @@
+logging_: !!python/object:skddp_se.utils.config.LoggingConfig
+  log_dir: !!python/object/apply:pathlib.PosixPath
+  - logs
+  - LJ-DEMAND_example
+  log_freq: 100
+  save_intermediate_steps:
+  - 10
+  - 100
+  - 500
+  - 1000
+loss: !!python/object:skddp_se.utils.config.LossConfig
+  clean_refinement_decreasing: !!python/object:skddp_se.utils.config.KurtlossConfig
+    kernel_size:
+    - 16
+    - -1
+    stride:
+    - 16
+    - -1
+    weight: 0.001
+  clean_refinement_increasing: !!python/object:skddp_se.utils.config.KurtlossConfig
+    kernel_size:
+    - -1
+    - 16
+    stride:
+    - -1
+    - 16
+    weight: 0.001
+  clean_segkurtosis_increasing: !!python/object:skddp_se.utils.config.KurtlossConfig
+    kernel_size:
+    - 2
+    - 32
+    stride:
+    - 2
+    - 32
+    weight: 1.0e-05
+  noise_segkurtosis_decreasing: !!python/object:skddp_se.utils.config.KurtlossConfig
+    kernel_size:
+    - 2
+    - 32
+    stride:
+    - 2
+    - 32
+    weight: 2.0
+  reconstruction_loss_type: MAE
+model: !!python/object:skddp_se.utils.config.ModelConfig
+  clean_net: !!python/object:skddp_se.utils.config._NetworkConfig
+    input_feature: uniform-TFcoherent
+    softplus_beta: 5.0
+  mixing_type: mean
+  noise_net: !!python/object:skddp_se.utils.config._NetworkConfig
+    input_feature: meshgrid
+    softplus_beta: 2.0
+optimizer: !!python/object:skddp_se.utils.config.OptimizerConfig
+  batch_size: 4
+  iter: 2000
+  lr: 0.001
+  result_dir: ./results/
+preprocess: !!python/object:skddp_se.utils.config.PreprocessConfig
+  SNR_list:
+  - 5
+  - 10
+  - 15
+  clean_list:
+  - !!python/object/apply:pathlib.PosixPath
+    - corpus
+    - LJSpeech-1.1
+    - wavs
+  clean_samples: 10
+  clip_seconds: 2.0
+  dump_dir: !!python/object/apply:pathlib.PosixPath
+  - preprocessed_data
+  noise_list:
+  - !!python/object/apply:pathlib.PosixPath
+    - corpus
+    - DEMAND
+    - NFIELD
+    - ch01.wav
+  - !!python/object/apply:pathlib.PosixPath
+    - corpus
+    - DEMAND
+    - PRESTO
+    - ch01.wav
+  - !!python/object/apply:pathlib.PosixPath
+    - corpus
+    - DEMAND
+    - PSTATION
+    - ch01.wav
+  - !!python/object/apply:pathlib.PosixPath
+    - corpus
+    - DEMAND
+    - SPSQUARE
+    - ch01.wav
+  - !!python/object/apply:pathlib.PosixPath
+    - corpus
+    - DEMAND
+    - TBUS
+    - ch01.wav
+  sample_rate: 16000
+seed: 42
+spec: !!python/object:skddp_se.utils.config.SpecConfig
+  fft_length: 512
+  hop_length: 128
